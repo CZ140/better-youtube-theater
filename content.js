@@ -20,6 +20,7 @@ const state = { theater: false, sidebar: 'recs', ambient: true };
 let lastExpandClick = 0;
 let observedChat = null;
 let chatSeenOpen = false;
+let noAnimTimer = null;
 
 // react to YouTube's own chat state changes (its ✕ header button) the moment
 // the [collapsed] attribute lands — the frame is recreated per watch page,
@@ -55,8 +56,17 @@ function apply() {
   // 'chat' is meaningless without a chat frame — fall back to recommendations
   const sidebar = state.sidebar === 'chat' && !chat ? 'recs' : state.sidebar;
 
+  // entering/leaving theater: YouTube relayouts the whole page anyway — our
+  // slide/fade transitions would just drop frames on top of it, so snap
+  const theaterFlip = html.hasAttribute('byt-theater') !== state.theater;
+  if (theaterFlip) {
+    html.classList.add('byt-no-anim');
+    clearTimeout(noAnimTimer);
+    noAnimTimer = setTimeout(() => html.classList.remove('byt-no-anim'), 400);
+  }
+
   const changed =
-    html.hasAttribute('byt-theater') !== state.theater ||
+    theaterFlip ||
     html.hasAttribute('byt-live') !== !!chat ||
     html.hasAttribute('byt-ambient') !== state.ambient ||
     html.getAttribute('byt-sidebar') !== sidebar;
@@ -64,6 +74,9 @@ function apply() {
   html.toggleAttribute('byt-live', !!chat);
   html.toggleAttribute('byt-ambient', state.ambient);
   html.setAttribute('byt-sidebar', sidebar);
+  // JS-tracked instead of CSS :has(): :has on <html> re-evaluates during
+  // YouTube's massive DOM churn and taxes every theater/fullscreen toggle
+  html.toggleAttribute('byt-glow', !!document.querySelector('#cinematics canvas'));
 
   // Sync YouTube's native chat state: while expanded, YouTube reserves player
   // space (--ytd-watch-flexy-sidebar-width) even if we hide chat with CSS,
@@ -155,12 +168,15 @@ function hookFlexy() {
   }
   const sync = () => {
     // no pathname check: streams also live at /@channel/live; YouTube marks
-    // the watch page inactive with [hidden] instead
-    state.theater = flexy.hasAttribute('theater') && !flexy.hasAttribute('hidden');
+    // the watch page inactive with [hidden] instead. Fullscreen is YouTube's
+    // own layout — our theater steps aside entirely.
+    state.theater = flexy.hasAttribute('theater') && !flexy.hasAttribute('hidden')
+      && !document.fullscreenElement;
     apply();
   };
   new MutationObserver(sync).observe(flexy, { attributes: true, attributeFilter: ['theater'] });
   window.addEventListener('yt-navigate-finish', sync);
+  document.addEventListener('fullscreenchange', sync);
   sync();
 }
 

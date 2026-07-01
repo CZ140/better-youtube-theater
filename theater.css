@@ -66,7 +66,9 @@ html[byt-theater][byt-ambient] #cinematics {
   overflow: visible !important;
   filter: brightness(var(--byt-glow-boost)) saturate(1.3);
 }
-html[byt-theater][byt-ambient]:has(#cinematics canvas) ytd-watch-flexy #full-bleed-container {
+/* [byt-glow] = content.js saw a glow canvas (was :has(#cinematics canvas),
+   but :has on <html> taxes style invalidation during YouTube's DOM churn) */
+html[byt-theater][byt-ambient][byt-glow] ytd-watch-flexy #full-bleed-container {
   overflow: visible !important;
   width: calc(var(--byt-video-w) - 2 * var(--byt-glow-inset)) !important;
   margin-left: var(--byt-glow-inset) !important;
@@ -207,8 +209,18 @@ html[byt-theater]:not([byt-live]) #byt-cluster button[data-mode="chat"] {
   display: none;
 }
 /* no glow button when YouTube offers no glow (live, light theme, Ambient Mode off) */
-html[byt-theater]:not(:has(#cinematics canvas)) #byt-cluster button[data-mode="ambient"] {
+html[byt-theater]:not([byt-glow]) #byt-cluster button[data-mode="ambient"] {
   display: none;
+}
+
+/* theater enter/exit snaps — YouTube's own relayout dominates; our
+   animations on top of it only drop frames (content.js sets this briefly) */
+html.byt-no-anim ytd-watch-flexy #secondary,
+html.byt-no-anim #chat-container ytd-live-chat-frame,
+html.byt-no-anim #byt-cluster,
+html.byt-no-anim #cinematics,
+html.byt-no-anim #masthead-container #masthead {
+  transition: none !important;
 }
 
 /* one orchestrated motion set; none if the user opted out */
