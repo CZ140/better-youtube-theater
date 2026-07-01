@@ -71,6 +71,14 @@ html[byt-theater][byt-ambient]:has(#cinematics canvas) ytd-watch-flexy #full-ble
   width: calc(var(--byt-video-w) - 2 * var(--byt-glow-inset)) !important;
   margin-left: var(--byt-glow-inset) !important;
 }
+/* the unclipped glow canvas overhangs the viewport ~670px to the right —
+   clip it at ytd-app so the page can't scroll horizontally. ytd-app is not
+   the scroll root (scrolling stays stock) and overflow doesn't clip our
+   fixed-position sidebar/cluster. y stays visible so the glow can still
+   bleed vertically. */
+html[byt-theater][byt-ambient] ytd-app {
+  overflow-x: clip;
+}
 
 /* ---- recommendations sidebar: fixed right column, full height ---------
    hidden states slide out (transform + delayed visibility) instead of
