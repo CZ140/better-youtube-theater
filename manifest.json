@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Better YouTube Theater",
+  "version": "1.0.0",
+  "description": "Twitch-style theater mode for YouTube: full-viewport video, dockable recommendations/chat sidebar, hover-reveal search bar, ambient glow.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["theater.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Better YouTube Theater"
+  }
+}
