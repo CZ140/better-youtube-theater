@@ -119,6 +119,12 @@ html[byt-theater][byt-sidebar="recs"] ytd-watch-flexy #secondary {
 html[byt-theater] ytd-watch-flexy {
   --ytd-watch-flexy-sidebar-width: 0px !important;
 }
+/* ...but the same var also sizes content INSIDE the sidebar (Shorts tiles
+   collapsed to 4px slivers) — restore it for the #secondary subtree; the
+   player JS reads it from ytd-watch-flexy, which stays 0 */
+html[byt-theater] ytd-watch-flexy #secondary {
+  --ytd-watch-flexy-sidebar-width: var(--byt-sidebar-w) !important;
+}
 html[byt-theater][byt-live] #chat-container ytd-live-chat-frame {
   position: fixed !important;
   top: 0 !important;
